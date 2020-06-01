@@ -1,2 +1,4 @@
 #!/bin/bash
-PYTHONPATH="${PYTHONPATH}:${PWD}" pytest tests/test*
+parent=$(dirname "${PWD}")
+
+PYTHONPATH="${PYTHONPATH}:${parent}" pytest tests/test*

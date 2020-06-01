@@ -2,7 +2,7 @@
 A singleton manager for tracking tmux panes/windows
 """
 
-from singleton import Singleton
+from tmux_session_utils.singleton import Singleton
 
 
 @Singleton

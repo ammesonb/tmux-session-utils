@@ -3,10 +3,10 @@ Tests pane functionality
 """
 from pytest import fixture
 
-from utils import assert_objects_equal
-from tmux_utils import get_pane_syntax
-from builder.object_tracker import ObjectTracker
-from builder.pane import Pane, SPLIT_HORIZONTAL, SPLIT_VERTICAL
+from tmux_session_utils.utils import assert_objects_equal
+from tmux_session_utils.tmux_utils import get_pane_syntax
+from tmux_session_utils.builder.object_tracker import ObjectTracker
+from tmux_session_utils.builder.pane import Pane, SPLIT_HORIZONTAL, SPLIT_VERTICAL
 
 
 @fixture(autouse=True)

@@ -2,9 +2,9 @@
 Represents a pane in a tmux session
 """
 
-from utils import get_object_differences
-from tmux_utils import get_pane_syntax, escape_command
-from builder.object_tracker import ObjectTracker
+from tmux_session_utils.builder.object_tracker import ObjectTracker
+from tmux_session_utils.utils import get_object_differences
+from tmux_session_utils.tmux_utils import get_pane_syntax, escape_command
 
 SPLIT_HORIZONTAL = "h"
 SPLIT_VERTICAL = "v"

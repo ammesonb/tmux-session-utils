@@ -3,12 +3,16 @@ Test session scripter functions
 """
 from pytest import fixture
 
-from builder.tmux_scripter import TmuxScripter
-from builder.object_tracker import ObjectTracker
-from builder.fake_window import FakeWindow
-from builder.fake_pane import FakePane
-from tmux_utils import inject_session_data, SESSION_INITIAL_DIR_KEY, WINDOW_LIST_KEY
-from utils import convert_lines_to_object, assert_objects_equal
+from tmux_session_utils.builder.tmux_scripter import TmuxScripter
+from tmux_session_utils.builder.object_tracker import ObjectTracker
+from tmux_session_utils.builder.fake_window import FakeWindow
+from tmux_session_utils.builder.fake_pane import FakePane
+from tmux_session_utils.tmux_utils import (
+    inject_session_data,
+    SESSION_INITIAL_DIR_KEY,
+    WINDOW_LIST_KEY,
+)
+from tmux_session_utils.utils import convert_lines_to_object, assert_objects_equal
 
 
 # pylint: disable=bad-continuation

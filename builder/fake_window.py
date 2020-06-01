@@ -2,7 +2,7 @@
 An emulation of the Window class, for injecting pane data into tests
 """
 
-from tmux_utils import (
+from tmux_session_utils.tmux_utils import (
     inject_pane_data,
     WINDOW_ID_VARIABLE,
     WINDOW_LAYOUT_VARIABLE,

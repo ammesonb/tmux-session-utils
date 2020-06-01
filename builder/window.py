@@ -3,10 +3,10 @@ Represents a window in a tmux session """
 
 import re
 
-from builder.object_tracker import ObjectTracker
-from builder.pane import Pane, SPLIT_HORIZONTAL, SPLIT_VERTICAL
-from utils import parse_size, debug, get_object_differences
-from tmux_utils import (
+from tmux_session_utils.builder.object_tracker import ObjectTracker
+from tmux_session_utils.builder.pane import Pane, SPLIT_HORIZONTAL, SPLIT_VERTICAL
+from tmux_session_utils.utils import parse_size, debug, get_object_differences
+from tmux_session_utils.tmux_utils import (
     select_pane,
     get_tmux_details,
     WINDOW_LAYOUT_VARIABLE,

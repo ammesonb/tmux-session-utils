@@ -4,10 +4,10 @@ Tests window functionality
 from copy import deepcopy
 from pytest import fixture
 
-from builder.object_tracker import ObjectTracker
-from builder.window import Window
-from builder.pane import Pane, SPLIT_HORIZONTAL, SPLIT_VERTICAL
-from utils import assert_objects_equal
+from tmux_session_utils.builder.object_tracker import ObjectTracker
+from tmux_session_utils.builder.window import Window
+from tmux_session_utils.builder.pane import Pane, SPLIT_HORIZONTAL, SPLIT_VERTICAL
+from tmux_session_utils.utils import assert_objects_equal
 
 
 @fixture(autouse=True)

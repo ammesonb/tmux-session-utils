@@ -3,10 +3,10 @@ Test builder functions
 """
 from pytest import fixture
 
-from builder.tmux_builder import TmuxBuilder
-from builder.object_tracker import ObjectTracker
-from builder.pane import SPLIT_HORIZONTAL, SPLIT_VERTICAL
-from utils import convert_lines_to_object, assert_objects_equal
+from tmux_session_utils.builder.tmux_builder import TmuxBuilder
+from tmux_session_utils.builder.object_tracker import ObjectTracker
+from tmux_session_utils.builder.pane import SPLIT_HORIZONTAL, SPLIT_VERTICAL
+from tmux_session_utils.utils import convert_lines_to_object, assert_objects_equal
 
 
 @fixture(autouse=True)

@@ -14,10 +14,10 @@ from subprocess import check_output
 from math import floor
 from os import system
 
-from builder.object_tracker import ObjectTracker
-from builder.window import Window
-from builder.pane import Pane
-from tmux_utils import format_working_directory
+from tmux_session_utils.builder.object_tracker import ObjectTracker
+from tmux_session_utils.builder.window import Window
+from tmux_session_utils.builder.pane import Pane
+from tmux_session_utils.tmux_utils import format_working_directory
 
 # pylint: disable=too-many-instance-attributes
 class TmuxBuilder:

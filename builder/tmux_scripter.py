@@ -14,12 +14,12 @@ This will currently capture:
 
 import re
 
-from utils import parse_size, parse_args
-from tmux_utils import get_pane_working_directory, get_window_list
-from builder.object_tracker import ObjectTracker
-from builder.tmux_builder import TmuxBuilder
-from builder.window import Window
-from builder.pane import LAYOUT_INDICATORS
+from tmux_session_utils.builder.object_tracker import ObjectTracker
+from tmux_session_utils.builder.tmux_builder import TmuxBuilder
+from tmux_session_utils.builder.window import Window
+from tmux_session_utils.builder.pane import LAYOUT_INDICATORS
+from tmux_session_utils.utils import parse_size, parse_args
+from tmux_session_utils.tmux_utils import get_pane_working_directory, get_window_list
 
 
 # pylint: disable=too-many-instance-attributes

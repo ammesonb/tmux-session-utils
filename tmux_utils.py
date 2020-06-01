@@ -6,7 +6,7 @@ Allows injectable configurations for testing purposes
 from subprocess import Popen, PIPE, check_output
 from shlex import split
 
-from utils import get_id
+from tmux_session_utils.utils import get_id
 
 TMUX_DISPLAY_FORMAT_CMD = "tmux display-message -t {0} -p '#{{{1}}}'"
 INITIAL_SESSION_DIR_CMD = "pwdx {0} | gawk -F ' ' '{{ print $2 }}'"

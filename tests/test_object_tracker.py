@@ -3,7 +3,7 @@ Test object tracker functionality
 """
 from pytest import fixture
 
-from builder.object_tracker import ObjectTracker
+from tmux_session_utils.builder.object_tracker import ObjectTracker
 
 
 # pylint: disable=too-few-public-methods

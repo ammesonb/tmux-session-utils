@@ -2,7 +2,7 @@
 An emulation of the Pane class, for injecting pane data into tests
 """
 
-from tmux_utils import (
+from tmux_session_utils.tmux_utils import (
     inject_pane_data,
     PANE_ID_VARIABLE,
     PANE_PATH_VARIABLE,
