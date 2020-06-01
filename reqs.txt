@@ -1,0 +1,6 @@
+argparse
+uuid
+pylint
+pytest
+black
+pre-commit
