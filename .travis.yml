@@ -2,4 +2,4 @@ language: python
 install:
   - pip install -r reqs.txt
 script:
-  - pytest
+  - python3 -m pytest
