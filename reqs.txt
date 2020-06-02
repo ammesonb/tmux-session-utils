@@ -1,5 +1,5 @@
 argparse
-uuid
+uuid==1.30
 pylint
 pytest
 pytest-cov
