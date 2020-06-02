@@ -1,7 +1,7 @@
 argparse
 uuid
 pylint
-pytest
+pytest==5.4.2
 pytest-cov
 black
 pre-commit
