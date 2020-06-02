@@ -1,6 +1,6 @@
 argparse
 uuid
-pylint
+pylint==2.5.2
 pytest
 pytest-cov
 black
