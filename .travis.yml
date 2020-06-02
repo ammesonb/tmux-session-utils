@@ -1,6 +1,10 @@
 language: python
 install:
   - pip install -r reqs.txt
-  - pip install -e .
+  - pip install -U pytest
+  - pip install .
+  - pip install codecov
 script:
   - python3 -m pytest
+after_success:
+  - codecov
