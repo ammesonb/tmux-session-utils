@@ -1,7 +1,6 @@
-update: insecure
 requirements:
-  - reqs.txt
-    update: all
+  - reqs.txt:
+    update: insecure
     pin: True
 
 close_prs: False
