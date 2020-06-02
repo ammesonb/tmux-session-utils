@@ -1,5 +1,5 @@
 argparse==1.4.0
-uuid
+uuid==1.30
 pylint==2.5.2
 pytest
 pytest-cov==2.9.0
