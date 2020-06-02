@@ -1,7 +1,7 @@
 update: insecure
+pin: True
+branch: master
 requirements:
-  - reqs.txt:
-    update: all
-    pin: True
+  - reqs.txt
 
 close_prs: False
