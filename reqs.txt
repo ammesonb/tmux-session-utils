@@ -2,6 +2,6 @@ argparse
 uuid
 pylint
 pytest
-pytest-cov
+pytest-cov==2.9.0
 black
 pre-commit
