@@ -4,4 +4,4 @@ pylint==2.5.2
 pytest
 pytest-cov
 black==19.10b0
-pre-commit
+pre-commit==2.4.0
