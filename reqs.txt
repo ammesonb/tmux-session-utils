@@ -1,7 +1,7 @@
-argparse
+argparse==1.4.0
 uuid
-pylint
+pylint==2.5.2
 pytest
 pytest-cov==2.9.0
-black
-pre-commit
+black==19.10b0
+pre-commit==2.4.0
