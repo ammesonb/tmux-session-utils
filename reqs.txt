@@ -3,5 +3,5 @@ uuid
 pylint
 pytest
 pytest-cov
-black
+black==19.10b0
 pre-commit
