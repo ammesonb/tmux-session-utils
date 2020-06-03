@@ -13,6 +13,7 @@ Currently supports:
 from subprocess import check_output
 from math import floor
 from os import system
+from sys import stderr
 
 from tmux_session_utils.builder.object_tracker import ObjectTracker
 from tmux_session_utils.builder.window import Window
@@ -270,7 +271,9 @@ class TmuxBuilder:
         Prints a warning about the size of the terminal
         """
         if not self.size_warning_printed:
-            print("NOTE: USING CURRENT TERMINAL SIZE AS TEMPLATE FOR SESSION")
+            print(
+                "NOTE: USING CURRENT TERMINAL SIZE AS TEMPLATE FOR SESSION", file=stderr
+            )
             self.size_warning_printed = True
 
     def set_pane_height(self, height: int, pane: str = None) -> "TmuxBuilder":
