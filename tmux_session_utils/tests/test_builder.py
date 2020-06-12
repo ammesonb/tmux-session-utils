@@ -34,7 +34,7 @@ def test_create_get_set(capsys):
     builder = TmuxBuilder("session", "/home", False)
     expected["cwd"] = {
         "session_name": "session",
-        "start_dir": '-c "/home"',
+        "start_dir": "/home",
         "detach": False,
     }
     actual["cwd"] = builder
@@ -53,9 +53,11 @@ def test_single_pane_window(capsys):
 
     expected = convert_lines_to_object(
         [
-            'tmux new-session -d -s session -c "/etc" \\; \\',
+            'pushd "/etc"',
+            "tmux new-session -d -s session \\; \\",
             "rename-window window \\; \\",
             'send-keys "top" "C-m"',
+            "popd",
         ]
     )
 
@@ -75,11 +77,13 @@ def test_two_window_single_pane(capsys):
 
     expected = convert_lines_to_object(
         [
-            'tmux new-session -d -s session -c "/var" \\; \\',
+            'pushd "/var"',
+            "tmux new-session -d -s session \\; \\",
             "rename-window window \\; \\",
             'send-keys "top" "C-m" \\; \\',
             'new-window -n window2 -c "/home" \\; \\',
             'send-keys "tail" "C-m"',
+            "popd",
         ]
     )
 
@@ -102,7 +106,8 @@ def test_two_split_panes(capsys):
 
     expected = convert_lines_to_object(
         [
-            'tmux new-session -d -s session -c "/var" \\; \\',
+            'pushd "/var"',
+            "tmux new-session -d -s session \\; \\",
             "rename-window window \\; \\",
             'send-keys "echo" "C-m" \\; \\',
             'split-window -h -c "/var" \\; \\',
@@ -110,6 +115,7 @@ def test_two_split_panes(capsys):
             'new-window -n window2 -c "/home" \\; \\',
             'split-window -v -c "/etc" \\; \\',
             'send-keys "tail" "C-m"',
+            "popd",
         ]
     )
 
@@ -119,8 +125,15 @@ def test_two_split_panes(capsys):
 def test_double_three_split_with_target(capsys):
     """
     Test three-way split in two directions, with window targets
+    0 |
+    - | 2
+    1 |
+
+    0 | 1
+    -----
+      2
     """
-    builder = TmuxBuilder("session", "/var")
+    builder = TmuxBuilder("session", "/")
     builder.add_window("w1", "w1p1", "w1")
     builder.add_pane("w1p2", SPLIT_HORIZONTAL)
     builder.add_window("w2", "w2p1", "w2", "/home")
@@ -131,13 +144,15 @@ def test_double_three_split_with_target(capsys):
 
     expected = convert_lines_to_object(
         [
-            'tmux new-session -d -s session -c "/var" \\; \\',
+            'pushd "/"',
+            "tmux new-session -d -s session \\; \\",
             "rename-window w1 \\; \\",
-            'split-window -h -c "/var" \\; \\',
-            'split-window -v -t session:0.0 -c "/var" \\; \\',
+            'split-window -h -c "/" \\; \\',
+            'split-window -v -t session:0.0 -c "/" \\; \\',
             'new-window -n w2 -c "/home" \\; \\',
             'split-window -v -c "/etc" \\; \\',
-            'split-window -h -t session:1.0 -c "/var"',
+            'split-window -h -t session:1.0 -c "/home"',
+            "popd",
         ]
     )
 
@@ -158,12 +173,14 @@ def test_multiple_sequential_splits(capsys):
 
     expected = convert_lines_to_object(
         [
-            'tmux new-session -d -s session -c "/var" \\; \\',
+            'pushd "/var"',
+            "tmux new-session -d -s session \\; \\",
             "rename-window w1 \\; \\",
             'split-window -h -c "/var" \\; \\',
             'split-window -v -c "/var" \\; \\',
             'split-window -v -c "/var" \\; \\',
             'split-window -h -c "/var"',
+            "popd",
         ]
     )
 
@@ -187,13 +204,15 @@ def test_middle_split_pane_with_sizing(capsys):
 
     expected = convert_lines_to_object(
         [
-            'tmux new-session -d -s session -c "/var" \\; \\',
+            'pushd "/var"',
+            "tmux new-session -d -s session \\; \\",
             "rename-window w0 \\; \\",
             'split-window -h -c "/var" \\; \\',
             'split-window -h -c "/var" \\; \\',
             'split-window -v -t session:0.1 -c "/var" \\; \\',
             "resize-pane -t session:0.0 -x 80  \\; \\",
             "resize-pane -t session:0.2 -x 60 -y 40",
+            "popd",
         ]
     )
 
@@ -260,7 +279,8 @@ def test_many_hard_panes(capsys):
 
     expected = convert_lines_to_object(
         [
-            'tmux new-session -d -s session -c "/var" \\; \\',
+            'pushd "/var"',
+            "tmux new-session -d -s session \\; \\",
             "rename-window w0 \\; \\",
             'split-window -h -c "/var" \\; \\',
             'split-window -h -c "/var" \\; \\',
@@ -282,6 +302,7 @@ def test_many_hard_panes(capsys):
             'split-window -h -c "/var" \\; \\',
             'split-window -v -t session:3.1 -c "/var" \\; \\',
             'split-window -h -t session:3.1 -c "/var"',
+            "popd",
         ]
     )
     assert_objects_equal(expected, actual, expected.keys(), capsys)

@@ -14,6 +14,12 @@ from tmux_session_utils.tmux_utils import (
 )
 from tmux_session_utils.utils import convert_lines_to_object, assert_objects_equal
 
+GENERIC_START = [
+    'pushd "/home/brett"',
+    "tmux new-session -d -s session \\; \\",
+    "rename-window window \\; \\",
+]
+
 
 # pylint: disable=bad-continuation
 # black auto-format disagrees
@@ -134,11 +140,7 @@ def test_single_pane_session(capsys):
     scripter.analyze(window_list)
 
     expected = convert_lines_to_object(
-        [
-            'tmux new-session -d -s session -c "/home/brett" \\; \\',
-            "rename-window window \\; \\",
-            'send-keys "top" "C-m"',
-        ]
+        GENERIC_START + ['send-keys "top" "C-m"', "popd",]
     )
     actual = convert_lines_to_object(scripter.commands.split("\n"))
 
@@ -181,14 +183,14 @@ def test_split_pane_session(capsys):
     scripter.analyze(window_list)
 
     expected = convert_lines_to_object(
-        [
-            'tmux new-session -d -s session -c "/home/brett" \\; \\',
-            "rename-window window \\; \\",
+        GENERIC_START
+        + [
             'send-keys "top" "C-m" \\; \\',
             'split-window -h -t session:0.0 -c "/var/log" \\; \\',
             'send-keys "tail -f syslog" "C-m" \\; \\',
             "resize-pane -t session:0.0 -x 100 -y 60 \\; \\",
             "resize-pane -t session:0.1 -x 100 -y 60",
+            "popd",
         ]
     )
     actual = convert_lines_to_object(scripter.commands.split("\n"))
@@ -253,7 +255,12 @@ def test_two_perpendicular_windows(capsys):
             "dir": "/root",
             "layout": window_layout_two,
             "panes": [
-                {"identity": "pane4", "number": 0},
+                {
+                    "identity": "pane4",
+                    "number": 0,
+                    # This should override the window directory
+                    "dir": "/home/brett",
+                },
                 {
                     "identity": "pane5",
                     "number": 1,
@@ -281,9 +288,8 @@ def test_two_perpendicular_windows(capsys):
     scripter.analyze(window_list)
 
     expected = convert_lines_to_object(
-        [
-            'tmux new-session -d -s session -c "/home/brett" \\; \\',
-            "rename-window window \\; \\",
+        GENERIC_START
+        + [
             'send-keys "top" "C-m" \\; \\',
             'split-window -h -t session:0.0 -c "/var/log" \\; \\',
             'send-keys "tail -f syslog" "C-m" \\; \\',
@@ -300,6 +306,7 @@ def test_two_perpendicular_windows(capsys):
             "resize-pane -t session:1.0 -x 200 -y 30 \\; \\",
             "resize-pane -t session:1.1 -x 150 -y 30 \\; \\",
             "resize-pane -t session:1.2 -x 50 -y 30",
+            "popd",
         ]
     )
     actual = convert_lines_to_object(scripter.commands.split("\n"))
@@ -357,9 +364,8 @@ def test_nested_split(capsys):
     scripter.analyze(window_list)
 
     expected = convert_lines_to_object(
-        [
-            'tmux new-session -d -s session -c "/home/brett" \\; \\',
-            "rename-window window \\; \\",
+        GENERIC_START
+        + [
             'send-keys "top" "C-m" \\; \\',
             'split-window -h -t session:0.0 -c "/home/brett" \\; \\',
             'split-window -h -t session:0.1 -c "/home/brett" \\; \\',
@@ -372,6 +378,7 @@ def test_nested_split(capsys):
             "resize-pane -t session:0.4 -x 50 -y 60 \\; \\",
             "resize-pane -t session:0.1 -x 100 -y 30 \\; \\",
             "resize-pane -t session:0.3 -x 50 -y 30",
+            "popd",
         ]
     )
     actual = convert_lines_to_object(scripter.commands.split("\n"))
@@ -421,9 +428,8 @@ def test_nested_middle_split(capsys):
     scripter.analyze(window_list)
 
     expected = convert_lines_to_object(
-        [
-            'tmux new-session -d -s session -c "/home/brett" \\; \\',
-            "rename-window window \\; \\",
+        GENERIC_START
+        + [
             'split-window -h -t session:0.0 -c "/home/brett" \\; \\',
             'split-window -h -t session:0.1 -c "/home/brett" \\; \\',
             'split-window -v -t session:0.0 -c "/home/brett" \\; \\',
@@ -433,6 +439,7 @@ def test_nested_middle_split(capsys):
             "resize-pane -t session:0.3 -x 70 -y 45 \\; \\",
             "resize-pane -t session:0.1 -x 30 -y 40 \\; \\",
             "resize-pane -t session:0.4 -x 70 -y 15",
+            "popd",
         ]
     )
     actual = convert_lines_to_object(scripter.commands.split("\n"))
@@ -502,9 +509,8 @@ def test_horizontal_tri_split(capsys):
     scripter.analyze(window_list)
 
     expected = convert_lines_to_object(
-        [
-            'tmux new-session -d -s session -c "/home/brett" \\; \\',
-            "rename-window window \\; \\",
+        GENERIC_START
+        + [
             'split-window -h -t session:0.0 -c "/home/brett" \\; \\',
             'split-window -h -t session:0.1 -c "/home/brett" \\; \\',
             'split-window -v -t session:0.0 -c "/home/brett" \\; \\',
@@ -523,6 +529,7 @@ def test_horizontal_tri_split(capsys):
             "resize-pane -t session:0.4 -x 70 -y 36 \\; \\",
             "resize-pane -t session:0.6 -x 100 -y 10 \\; \\",
             "resize-pane -t session:0.7 -x 100 -y 5",
+            "popd",
         ]
     )
     actual = convert_lines_to_object(scripter.commands.split("\n"))
@@ -589,9 +596,8 @@ def test_vertical_tri_split_with_hitch(capsys):
     scripter.analyze(window_list)
 
     expected = convert_lines_to_object(
-        [
-            'tmux new-session -d -s session -c "/home/brett" \\; \\',
-            "rename-window window \\; \\",
+        GENERIC_START
+        + [
             'split-window -v -t session:0.0 -c "/home/brett" \\; \\',
             'split-window -v -t session:0.1 -c "/home/brett" \\; \\',
             'split-window -h -t session:0.0 -c "/home/brett" \\; \\',
@@ -610,6 +616,7 @@ def test_vertical_tri_split_with_hitch(capsys):
             "resize-pane -t session:0.6 -x 60 -y 10 \\; \\",
             "resize-pane -t session:0.8 -x 40 -y 30 \\; \\",
             "resize-pane -t session:0.7 -x 60 -y 20",
+            "popd",
         ]
     )
     actual = convert_lines_to_object(scripter.commands.split("\n"))

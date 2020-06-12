@@ -171,7 +171,10 @@ class TmuxScripter:
             for pane in window.panes:
                 if first_pane:
                     self.builder.add_window(
-                        window.identity, pane.identity, window.name, window.start_dir
+                        window.identity,
+                        pane.identity,
+                        window.name,
+                        window.panes[0].start_dir,
                     )
                     first_pane = False
                 else:

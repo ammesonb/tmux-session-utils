@@ -80,7 +80,7 @@ class TmuxBuilder:
         self.session_name = session_name
         self.objects = ObjectTracker()
         self.windows = []
-        self.start_dir = format_working_directory(starting_directory)
+        self.start_dir = starting_directory
         self.detach = bool(detach)
 
         self.__get_terminal_size()
@@ -200,7 +200,7 @@ class TmuxBuilder:
             .set_number(window_num)
             .set_session_name(self.session_name)
             .set_start_dir(
-                format_working_directory(working_directory) or self.start_dir
+                format_working_directory(working_directory or self.start_dir)
             )
         )
         self.windows.append(window)
@@ -248,13 +248,20 @@ class TmuxBuilder:
             target = None
 
         panes = window.get_pane_count()
+
+        start_dir = None
+        if working_directory:
+            start_dir = format_working_directory(working_directory)
+        elif window.start_dir:
+            start_dir = window.start_dir
+        else:
+            start_dir = format_working_directory(self.start_dir)
+
         pane = (
             Pane(identity, window, split_dir, panes == 0)
             .set_number(panes)
             .set_session_name(self.session_name)
-            .set_start_dir(
-                format_working_directory(working_directory) or self.start_dir
-            )
+            .set_start_dir(start_dir)
         )
 
         if split_from:
@@ -409,8 +416,8 @@ class TmuxBuilder:
             raise RuntimeError("No windows provided!")
 
         commands = [
-            "tmux new-session {2} -s {0} {1}".format(
-                self.session_name, self.start_dir, "-d" if self.detach else ""
+            "tmux new-session {1} -s {0}".format(
+                self.session_name, "-d" if self.detach else ""
             )
         ]
 
@@ -437,7 +444,8 @@ class TmuxBuilder:
                 if size_command:
                     commands.append(size_command)
 
-        return " \\; \\\n".join(commands)
+        commands = " \\; \\\n".join(commands)
+        return 'pushd "{0}"\n'.format(self.start_dir) + commands + "\n" + "popd"
 
     def run(self) -> None:
         """
