@@ -729,3 +729,75 @@ def test_layered_right_side(capsys):
     actual = convert_lines_to_object(scripter.commands.split("\n"))
 
     assert_objects_equal(expected, actual, expected.keys(), capsys)
+
+
+def test_quintuple_layout():
+    """
+    Tests a layout where the left half is split in two and the right in thirds
+
+        |  2
+     0  | ---
+    --- |  3
+     1  | ---
+        |  4
+    """
+    window_layout = (
+        # Left side
+        "e078,200x60,0,0{80x60,0,0[80x40,0,0,264,80x20,0,41,268],"
+        # Right side
+        "120x60,81,0[120x20,81,0,265,120x30,81,21,266,120x10,81,51,267]}"
+    )
+
+    window_data = [
+        {
+            "identity": "window",
+            "number": 0,
+            "title": "window",
+            "postfix": "~-",
+            "layout": window_layout,
+            "panes": [
+                {"identity": "pane0", "number": 0},
+                {"identity": "pane1", "number": 1, "parent": "pane0", "command": "ssh"},
+                {"identity": "pane2", "number": 2, "parent": "pane0", "command": "vi"},
+                {"identity": "pane3", "number": 3, "parent": "pane2", "command": "cat"},
+                {
+                    "identity": "pane4",
+                    "number": 4,
+                    "parent": "pane3",
+                    "command": "tail",
+                },
+            ],
+        }
+    ]
+
+    window_list = set_session_parameters(
+        DEFAULT_SESSION, DEFAULT_DIRECTORY, window_data,
+    )
+
+    scripter = TmuxScripter(DEFAULT_SESSION, DEFAULT_DIRECTORY).set_terminal_size(
+        TERMINAL_WIDTH, TERMINAL_HEIGHT
+    )
+    scripter.analyze(window_list)
+
+    expected = convert_lines_to_object(
+        GENERIC_START
+        + [
+            'split-window -h -t session:0.0 -c "/home/brett" \\; \\',
+            'send-keys "vi" "C-m" \\; \\',
+            'split-window -v -t session:0.0 -c "/home/brett" \\; \\',
+            'send-keys "ssh" "C-m" \\; \\',
+            'split-window -v -t session:0.2 -c "/home/brett" \\; \\',
+            'send-keys "cat" "C-m" \\; \\',
+            'split-window -v -t session:0.3 -c "/home/brett" \\; \\',
+            'send-keys "tail" "C-m" \\; \\',
+            "resize-pane -t session:0.0 -x 80 -y 40 \\; \\",
+            "resize-pane -t session:0.2 -x 120 -y 20 \\; \\",
+            "resize-pane -t session:0.1 -x 80 -y 20 \\; \\",
+            "resize-pane -t session:0.3 -x 120 -y 30 \\; \\",
+            "resize-pane -t session:0.4 -x 120 -y 10",
+            "popd",
+        ]
+    )
+    actual = convert_lines_to_object(scripter.commands.split("\n"))
+
+    assert expected == actual
