@@ -180,7 +180,8 @@ def test_split_pane_session(capsys):
     scripter = TmuxScripter(DEFAULT_SESSION, DEFAULT_DIRECTORY).set_terminal_size(
         TERMINAL_WIDTH, TERMINAL_HEIGHT
     )
-    scripter.analyze(window_list)
+    with capsys.disabled():
+        scripter.analyze(window_list)
 
     expected = convert_lines_to_object(
         GENERIC_START
@@ -616,6 +617,112 @@ def test_vertical_tri_split_with_hitch(capsys):
             "resize-pane -t session:0.6 -x 60 -y 10 \\; \\",
             "resize-pane -t session:0.8 -x 40 -y 30 \\; \\",
             "resize-pane -t session:0.7 -x 60 -y 20",
+            "popd",
+        ]
+    )
+    actual = convert_lines_to_object(scripter.commands.split("\n"))
+
+    assert_objects_equal(expected, actual, expected.keys(), capsys)
+
+
+def test_layered_right_side(capsys):
+    """
+    Test a complex right-side layout
+
+      |     1
+      | ---------
+    0 | 2 | 4 | 6
+      | ---------
+      | 3 | 5 | 7
+    """
+
+    window_layout = (
+        # Left pane
+        "999f,200x60,0,0{100x60,0,0,5,"
+        # Top right pane
+        "100x60,101,0[100x20,101,0,6,"
+        # Left stripe of panes (2 and 5)
+        "100x40,101,21{10x40,101,21[10x20,101,21,7,10x20,101,41,31],"
+        # Center stripe of panes (3 and 6)
+        "40x40,111,21[40x20,111,21,8,40x20,111,41,9],"
+        # Right stripe of panes (4 and 7)
+        "50x40,151,21[50x20,151,21,29,50x20,151,41,30]}]}"
+    )
+
+    window_data = [
+        {
+            "identity": "window",
+            "number": 0,
+            "title": "window",
+            "postfix": "~-",
+            "layout": window_layout,
+            "panes": [
+                {"identity": "pane0", "number": 0},
+                {"identity": "pane1", "number": 1, "parent": "pane0", "command": "ssh"},
+                {"identity": "pane2", "number": 2, "parent": "pane1", "command": "vi"},
+                {"identity": "pane3", "number": 3, "parent": "pane2", "command": "cat"},
+                {
+                    "identity": "pane4",
+                    "number": 4,
+                    "parent": "pane2",
+                    "command": "tail",
+                },
+                {
+                    "identity": "pane5",
+                    "number": 5,
+                    "parent": "pane3",
+                    "command": "htop",
+                },
+                {
+                    "identity": "pane6",
+                    "number": 6,
+                    "parent": "pane4",
+                    "command": "python",
+                },
+                {
+                    "identity": "pane7",
+                    "number": 7,
+                    "parent": "pane5",
+                    "command": "python3",
+                },
+            ],
+        }
+    ]
+
+    window_list = set_session_parameters(
+        DEFAULT_SESSION, DEFAULT_DIRECTORY, window_data,
+    )
+
+    scripter = TmuxScripter(DEFAULT_SESSION, DEFAULT_DIRECTORY).set_terminal_size(
+        TERMINAL_WIDTH, TERMINAL_HEIGHT
+    )
+    scripter.analyze(window_list)
+
+    expected = convert_lines_to_object(
+        GENERIC_START
+        + [
+            'split-window -h -t session:0.0 -c "/home/brett" \\; \\',
+            'send-keys "ssh" "C-m" \\; \\',
+            'split-window -v -t session:0.1 -c "/home/brett" \\; \\',
+            'send-keys "vi" "C-m" \\; \\',
+            'split-window -h -t session:0.2 -c "/home/brett" \\; \\',
+            'send-keys "tail" "C-m" \\; \\',
+            'split-window -h -t session:0.3 -c "/home/brett" \\; \\',
+            'send-keys "python" "C-m" \\; \\',
+            'split-window -v -t session:0.2 -c "/home/brett" \\; \\',
+            'send-keys "cat" "C-m" \\; \\',
+            'split-window -v -t session:0.4 -c "/home/brett" \\; \\',
+            'send-keys "htop" "C-m" \\; \\',
+            'split-window -v -t session:0.6 -c "/home/brett" \\; \\',
+            'send-keys "python3" "C-m" \\; \\',
+            "resize-pane -t session:0.0 -x 100 -y 60 \\; \\",
+            "resize-pane -t session:0.1 -x 100 -y 20 \\; \\",
+            "resize-pane -t session:0.2 -x 10 -y 20 \\; \\",
+            "resize-pane -t session:0.4 -x 40 -y 20 \\; \\",
+            "resize-pane -t session:0.6 -x 50 -y 20 \\; \\",
+            "resize-pane -t session:0.3 -x 10 -y 20 \\; \\",
+            "resize-pane -t session:0.5 -x 40 -y 20 \\; \\",
+            "resize-pane -t session:0.7 -x 50 -y 20",
             "popd",
         ]
     )

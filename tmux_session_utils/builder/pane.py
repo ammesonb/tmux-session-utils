@@ -56,7 +56,7 @@ class Pane:
     # pylint: disable=bad-continuation
     # black auto-format disagrees
     def __init__(
-        self, identity: str, window: "Window", direction: str, is_first: bool = False
+        self, identity: str, window: "Window", direction: str, is_first: bool = False,
     ) -> "Pane":
         """
         Sets up details about the pane

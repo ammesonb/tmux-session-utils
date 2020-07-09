@@ -46,6 +46,7 @@ class Window:
     DIRECTION_MAP = {"[": SPLIT_VERTICAL, "{": SPLIT_HORIZONTAL}
     LAYOUT_PAIRS = {"[": "]", "{": "}"}
     PANE_LAYOUT = r"([0-9]+x[0-9]+,[0-9]+,[0-9]+)"
+    PANE_DETAILS = r"([0-9]+x[0-9]+),([0-9]+),([0-9]+)([,\[\{]?)([0-9]*)"
 
     number = None
     start_dir = None
@@ -380,9 +381,11 @@ class Window:
         debug("Window", "add_pane_row", layout)
         if layout[0] == ",":
             self.add_simple_pane(win_id, parent_id)
+        elif layout[:2] in ["[{", "{["]:
+            self.process_double_nested_pane(layout, parent_id)
+
         else:
             direction = self.DIRECTION_MAP[layout[0]]
-            direction = SPLIT_HORIZONTAL if layout[0] == "{" else SPLIT_VERTICAL
             debug("Window", "add_pane_row", "Layout split direction: " + direction)
             # Strip outermost direction indicators
             layout = layout[1:-1]
@@ -405,19 +408,64 @@ class Window:
                         self.objects.get_pane_by_id(deferred_layout["parent"]).number
                     ),
                 )
-                debug(
-                    "Window",
-                    "add_pane_row",
-                    "Split direction: " + deferred_layout["split"],
-                )
-                self.add_pane_row(
-                    deferred_layout["layout"],
-                    deferred_layout["parent"],
-                    deferred_layout["split"],
-                )
+
+                if deferred_layout["prevailingSplit"]:
+                    debug(
+                        "Window",
+                        "add_pane_row",
+                        "Prevailing split direction: "
+                        + deferred_layout["prevailingSplit"],
+                    )
+
+                    self.add_pane_row(
+                        deferred_layout["layout"],
+                        deferred_layout["parent"],
+                        deferred_layout["prevailingSplit"],
+                    )
+                else:
+                    debug(
+                        "Window",
+                        "add_pane_row",
+                        "Split direction: " + deferred_layout["split"],
+                    )
+
+                    self.add_pane_row(
+                        deferred_layout["layout"],
+                        deferred_layout["parent"],
+                        deferred_layout["prevailingSplit"],
+                    )
+
+    # pylint: disable=bad-continuation,too-many-locals
+    def process_double_nested_pane(self, layout: str, parent_id: str):
+        """
+        Processes a double-nested layout, typically a NxM subnested-grid, e.g.
+           |
+           |   1
+           | -----
+         0 | 2 | 3
+           | -----
+           | 4 | 5
+           |
+
+        Parameters
+        ----------
+        layout : str
+            The nested layout string
+        parent_id : string
+            The ID of the parent for this layout
+        """
+        debug("Window", "process_double_nested_pane", "Layout is doubly-nested")
+        direction = self.DIRECTION_MAP[layout[0]]
+
+        for nested in self.identify_deferred_layouts(
+            layout[1:-1], direction, parent_id
+        ):
+            self.add_pane_row(nested, parent_id)
 
     # pylint: disable=bad-continuation
-    # black auto-format disagrees
+    # pylint: disable=too-many-statements
+    # Lots of debug calls, because of the complex logic that lives here
+    # So should be okay to ignore for linting
     def identify_deferred_layouts(
         self,
         layout: str,
@@ -516,28 +564,68 @@ class Window:
                     "Parent: " + str(self.panes_added - 1),
                 )
                 debug("Window", "identify_deferred", "Split direction: " + direction)
+                debug(
+                    "Window",
+                    "identify_deferred",
+                    "Prevailing split direction: "
+                    + (prevailing_split if prevailing_split else "None"),
+                )
 
                 pane_details = self.get_pane_details_from_layout(layout[1:length])
-                self.add_pane_by_layout(
-                    pane_details["selfLayout"],
-                    pane_details["number"],
-                    direction,
-                    parent_id,
-                )
+
+                layout_string = ""
+                # +1 because offset by initial direction indicator
+                if (
+                    layout[len(pane_details["selfLayout"]) + 1]
+                    not in self.DIRECTION_MAP
+                ):
+                    debug(
+                        "Window",
+                        "identify_deferred",
+                        "Placeholder layout: " + pane_details["selfLayout"],
+                    )
+
+                    self.add_pane_by_layout(
+                        pane_details["selfLayout"],
+                        pane_details["number"],
+                        prevailing_split if prevailing_split else direction,
+                        parent_id,
+                    )
+                    # Layout is direction indicator plus everything after the first pane
+                    # until the end of the matched (nested) layout
+                    # This will be added later, since
+                    # we need to parse layouts breadth-first
+                    layout_string = (
+                        layout[0]
+                        + layout[len(pane_details["selfLayout"]) + 1 : length + 1]
+                    )
+
+                    # After the prevailing split has been honored the first time
+                    # then the nested direction should be sequential, in order
+                    prevailing_split = None
+                else:
+                    debug(
+                        "Window",
+                        "identify_deferred",
+                        "NOT adding placeholder for double-nested layout",
+                    )
+
+                    # Pass through as-is, since deferred
+                    layout_string = layout
+                    # However, overwrite the prevailing split direction to match the new
+                    # nested split so the placeholder is created in the proper direction
+                    prevailing_split = self.DIRECTION_MAP[
+                        layout[len(pane_details["selfLayout"]) + 1]
+                    ]
 
                 deferred_layouts.append(
                     {
-                        # Keep the first character of the layout - [ or {
-                        "layout": layout[0]
-                        # Deferred layout is everything after the first pane through
-                        # the end of the matched (nested) layout
-                        # This will be added later, since
-                        # we need to parse layouts breadth-first
-                        + layout[len(pane_details["selfLayout"]) + 1 : length + 1],
+                        "layout": layout_string,
                         "parent": self.last_pane,
                         # Deferred layouts will contain the next direction,
                         # not the current direction
                         "split": self.DIRECTION_MAP[layout[0]],
+                        "prevailingSplit": prevailing_split,
                     }
                 )
 
@@ -559,8 +647,13 @@ class Window:
 
         return deferred_layouts
 
+    # pylint: disable=bad-continuation
     def add_pane_by_layout(
-        self, layout: str, pane_number: int, direction: str, parent_identity: str = None
+        self,
+        layout: str,
+        pane_number: int,
+        direction: str,
+        parent_identity: str = None,
     ) -> None:
         """
         Adds a new pane, using the layout to fill in details
@@ -643,7 +736,7 @@ class Window:
         dict
             containing details about the pane
         """
-        match = re.match(self.PANE_LAYOUT, layout)
+        match = re.match(self.PANE_DETAILS, layout)
         if not match:
             debug(
                 "Window",
@@ -652,11 +745,15 @@ class Window:
             )
             return {}
 
-        details = match.groups()[0]
-        size, offset_left, offset_top = details.split(",")
-        pane_number = layout.split(",")[3]
+        size = match.group(1)
+        offset_left = match.group(2)
+        offset_top = match.group(3)
+        indicator = match.group(4)
+        pane_number = match.group(5)
 
-        layout = details + ",{0},".format(pane_number)
+        layout = "{0},{1},{2}".format(size, offset_left, offset_top)
+        if indicator == ",":
+            layout += ",{0},".format(pane_number)
 
         return {
             "size": size,
