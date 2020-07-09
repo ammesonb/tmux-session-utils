@@ -429,7 +429,7 @@ class Window:
                     self.add_pane_row(
                         deferred_layout["layout"],
                         deferred_layout["parent"],
-                        deferred_layout["prevailingSplit"],
+                        deferred_layout["split"],
                     )
 
     # pylint: disable=bad-continuation
