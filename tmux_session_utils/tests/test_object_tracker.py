@@ -1,7 +1,7 @@
 """
 Test object tracker functionality
 """
-from pytest import fixture
+from pytest import fixture, raises
 
 from tmux_session_utils.builder.object_tracker import ObjectTracker
 
@@ -187,3 +187,27 @@ def test_adding_and_retrieving():
         else:
             actual = tracker.get_window_by_id(expected).identity
         assert actual == expected, "Retrieved {0} does not match!".format(expected)
+
+
+def test_removing_pane():
+    """
+    Test pane removal
+    """
+    tracker = ObjectTracker()
+
+    pane = Pane("pane")
+    pane2 = Pane("pane2")
+    window = Window("window")
+
+    tracker.add_window(window)
+    tracker.add_pane(pane)
+
+    with raises(TypeError):
+        tracker.remove_pane(window)
+
+    with raises(NameError):
+        tracker.remove_pane(pane2)
+
+    tracker.remove_pane(pane)
+    with raises(NameError):
+        tracker.get_pane_by_id("pane")

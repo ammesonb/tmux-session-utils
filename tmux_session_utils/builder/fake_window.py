@@ -42,23 +42,6 @@ class FakeWindow:
         self.session = session
         return self
 
-    def set_identity(self, identity: str) -> "FakeWindow":
-        """
-        Set the identity
-
-        Parameters
-        ----------
-        identity : string
-            The identity to set
-
-        Returns
-        -------
-        self
-            This instance
-        """
-        self.identity = identity
-        return self
-
     def set_name(self, name: str) -> "FakeWindow":
         """
         Set the window name

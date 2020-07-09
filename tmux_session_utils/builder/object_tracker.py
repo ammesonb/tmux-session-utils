@@ -137,9 +137,9 @@ class ObjectTracker:
         pane : 'Pane'
             The pane to remove
         """
-        self.__check_object_id(pane.identity)
-
-        if "Pane" not in str(type(pane)):
+        if pane.identity in self.objects_by_id and self.get_pane_by_id(pane.identity):
+            del self.objects_by_id[pane.identity]
+        elif pane.identity not in self.objects_by_id:
+            raise NameError("Identity not valid!")
+        else:
             raise TypeError("Object provided is not a pane!")
-
-        del self.objects_by_id[pane.identity]

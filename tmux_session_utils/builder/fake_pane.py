@@ -55,24 +55,6 @@ class FakePane:
         self.session = session
         return self
 
-    def set_identity(self, identity: str) -> "FakePane":
-        """
-        Set the identity
-
-        Parameters
-        ----------
-        identity : string
-            The identity to set
-
-        Returns
-        -------
-        self
-            This instance
-        """
-        self.identity = identity
-        self.attributes_set.append("identity")
-        return self
-
     def set_number(self, number: int) -> "FakePane":
         """
         Set the pane number
@@ -158,26 +140,6 @@ class FakePane:
         """
         self.command = command
         self.attributes_set.append("command")
-        return self
-
-    def set_size(self, width: int, height: int) -> "FakePane":
-        """
-        Set the size of this pane
-
-        Parameters
-        ----------
-        width : int
-            The width of the pane
-        height : int
-            The height of the pane
-
-        Returns
-        -------
-        self
-            This instance
-        """
-        self.width = width
-        self.height = height
         return self
 
     def inject(self):

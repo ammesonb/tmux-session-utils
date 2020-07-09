@@ -381,9 +381,6 @@ class Window:
         debug("Window", "add_pane_row", layout)
         if layout[0] == ",":
             self.add_simple_pane(win_id, parent_id)
-        elif layout[:2] in ["[{", "{["]:
-            self.process_double_nested_pane(layout, parent_id)
-
         else:
             direction = self.DIRECTION_MAP[layout[0]]
             debug("Window", "add_pane_row", "Layout split direction: " + direction)
@@ -435,34 +432,8 @@ class Window:
                         deferred_layout["prevailingSplit"],
                     )
 
-    # pylint: disable=bad-continuation,too-many-locals
-    def process_double_nested_pane(self, layout: str, parent_id: str):
-        """
-        Processes a double-nested layout, typically a NxM subnested-grid, e.g.
-           |
-           |   1
-           | -----
-         0 | 2 | 3
-           | -----
-           | 4 | 5
-           |
-
-        Parameters
-        ----------
-        layout : str
-            The nested layout string
-        parent_id : string
-            The ID of the parent for this layout
-        """
-        debug("Window", "process_double_nested_pane", "Layout is doubly-nested")
-        direction = self.DIRECTION_MAP[layout[0]]
-
-        for nested in self.identify_deferred_layouts(
-            layout[1:-1], direction, parent_id
-        ):
-            self.add_pane_row(nested, parent_id)
-
     # pylint: disable=bad-continuation
+    # pylint: disable=too-many-locals
     # pylint: disable=too-many-statements
     # Lots of debug calls, because of the complex logic that lives here
     # So should be okay to ignore for linting
@@ -509,10 +480,11 @@ class Window:
             debug("Window", "identify_deferred", "Remaining layout:")
             debug("Window", "identify_deferred", layout)
             if layout[0] == ",":
-                debug("Window", "identify_deferred", "Got pane number:")
                 match = re.match(r",([0-9]+)", layout)
                 pane_number = match.groups()[0]
-                debug("Window", "identify_deferred", pane_number)
+                debug(
+                    "Window", "identify_deferred", "Got pane number:" + str(pane_number)
+                )
                 match = re.match(r"(,[0-9]+,?)", layout)
                 to_remove = match.groups()[0]
                 layout = layout[len(to_remove) :]

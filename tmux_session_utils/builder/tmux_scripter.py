@@ -13,13 +13,10 @@ This will currently capture:
   Commands executing in the panes
 """
 
-import re
-
 from tmux_session_utils.builder.object_tracker import ObjectTracker
 from tmux_session_utils.builder.tmux_builder import TmuxBuilder
 from tmux_session_utils.builder.window import Window
-from tmux_session_utils.builder.pane import LAYOUT_INDICATORS
-from tmux_session_utils.utils import parse_size, parse_args
+from tmux_session_utils.utils import parse_args
 from tmux_session_utils.tmux_utils import get_pane_working_directory, get_window_list
 
 
@@ -100,34 +97,6 @@ class TmuxScripter:
         ObjectTracker().reset()
         self.create_builder()
         self.commands = self.build_commands()
-
-    def parse_root_layout(self, layout_string: str) -> None:
-        """
-        Parse a root string for the Tmux layout
-
-        Parameters
-        ----------
-        layout_string : string
-            The layout string to parse
-            Will be in a format of XXXX,widthxheight,0,0<more layout data>
-        """
-        self.layout_id = re.match("([^,]+)", layout_string).groups()[0]
-        remaining = layout_string[len(self.layout_id) + 1 :]
-        # NOTE: Don't support offsets yet
-        # Splits the remaining layout by the indicators of a layout string
-        # This will leave any remaining layout data intact
-        raw_size, offset_left, offset_top = re.split(
-            "[{0}]".format("".join(LAYOUT_INDICATORS)), remaining
-        )[:3]
-        size = parse_size(raw_size)
-        self.window_width = size["width"]
-        self.window_height = size["height"]
-        # The layout is everything after the ID
-        # 2 because two commas are stripped, and the rest is meaningful layout data
-        # Either will be ,<pane number> or further-delineated layouts
-        self.layout = remaining[
-            len(raw_size) + len(offset_left) + len(offset_top) + 2 :
-        ]
 
     def parse_windows(self, layout_string: str) -> None:
         """
