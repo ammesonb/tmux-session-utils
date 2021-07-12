@@ -1,6 +1,6 @@
 argparse==1.4.0
 uuid==1.30
-pylint==2.8.3
+pylint==2.9.3
 pytest==6.2.4
 pytest-cov==2.12.1
 black==21.6b0
