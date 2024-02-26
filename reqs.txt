@@ -1,7 +1,7 @@
 argparse==1.4.0
 uuid==1.30
 pylint==3.1.0
-pytest==8.0.1
+pytest==8.0.2
 pytest-cov==4.1.0
 black==24.2.0
 pre-commit==3.6.2
