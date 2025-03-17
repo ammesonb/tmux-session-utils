@@ -3,5 +3,5 @@ uuid==1.30
 pylint==3.3.5
 pytest==8.3.5
 pytest-cov==6.0.0
-black==24.4.2
+black==25.1.0
 pre-commit==3.7.1
